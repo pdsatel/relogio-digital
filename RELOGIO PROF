@@ -1,0 +1,63 @@
+#include <LiquidCrystal.h>
+
+#define LED 13
+
+#define BUTTON 12
+#define BUTTON2 11
+
+#define RS 7
+#define E 6
+#define DB4 5
+#define DB5 4
+#define DB6 3
+#define DB7 2
+
+LiquidCrystal tela (RS, E, DB4, DB5, DB6, DB7);
+
+int valor = 0;
+
+void setup() {
+  tela.begin(16,2);
+  pinMode(LED, OUTPUT);
+  pinMode(BUTTON, INPUT_PULLUP);
+  pinMode(BUTTON2, INPUT_PULLUP);
+}
+
+void loop() {
+  int estadoBT = digitalRead(BUTTON);
+  int estadoBT2 = digitalRead(BUTTON2);
+ 
+  if(estadoBT == 0){
+    delay(75);
+    valor++;
+  } else if(estadoBT2 == 0){
+  delay(75);
+    tela.clear();
+    tela.setCursor(0,0);
+    tela.print("Contagem com FOR: ");
+   
+    for(int i = 0; i < 11; i++){
+      delay(250);
+      tela.setCursor(0,1);
+      tela.print(i);
+    }
+  }
+ 
+  if(valor % 2 == 0){
+    digitalWrite(LED, HIGH);
+    tela.setCursor(0,0);
+    tela.print("Led Desligado!  ");
+    tela.setCursor(0,1);
+    tela.print("Contagem: ");
+    tela.setCursor(12,1);
+    tela.print(valor);
+  } else {
+  digitalWrite(LED, LOW);
+    tela.setCursor(0,0);
+    tela.print("Led Ligado!     ");
+    tela.setCursor(0,1);
+    tela.print("Contagem: ");
+    tela.setCursor(12,1);
+    tela.print(valor);
+  }
+}
