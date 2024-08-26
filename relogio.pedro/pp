@@ -1,61 +1,93 @@
 #include <LiquidCrystal.h>
 
-#define BUTTON 13
+
+#define BUTTON 2
 #define BUTTON2 12
 #define BUTTON3 11
 
 #define RS 7
 #define E 6
-#define DB4 5
-#define DB5 4
-#define DB6 3
-#define DB7 2
+#define DB4 4
+#define DB5 5
+#define DB6 10
+#define DB7 11
 
-LiquidCrystal tela(RS, E, DB4, DB5, DB6, DB7);
-
-int sec = 0;
-int minut = 0;
-int hour = 0;
+LiquidCrystal tela (RS, E, DB4, DB5, DB6, DB7);
+ 
+int sec=0;
+int minut=0;
+int hour=0;
 
 void setup() {
-  tela.begin(16, 2);
+  tela.begin(16,2);
   pinMode(BUTTON, INPUT_PULLUP);
   pinMode(BUTTON2, INPUT_PULLUP);
   pinMode(BUTTON3, INPUT_PULLUP);
+  
+  attachInterrupt(digitalPinToInterrupt(BUTTON), isr, FALLING);
 }
 
 void loop() {
   int estadoBT = digitalRead(BUTTON);
   int estadoBT2 = digitalRead(BUTTON2);
   int estadoBT3 = digitalRead(BUTTON3);
-
-  // Incrementar segundos
-  if (sec < 60) {
-    sec++;
-  } else {
-    sec = 0;
-    minut++;
-    if (minut >= 60) {
-      minut = 0;
-      hour++;
-      if (hour >= 24) {
-        hour = 0;
-      }
-    }
-  }
-
-  // Atualizar o display
-  tela.setCursor(2, 1);
-  if (hour < 10) tela.print("0");
-  tela.print(hour);
-  tela.print(":");
-  if (minut < 10) tela.print("0");
-  tela.print(minut);
-  tela.print(":");
-  if (sec < 10) tela.print("0");
-  tela.print(sec);
-
-  delay(10);  // Atraso de 1 segundo
 }
-	BUTTON=false 
-      for BUTTON == tru
+void isr(){
+    tela.setCursor(0,4);
+    tela.print("Pedro");
+  
+  for(hour=0; hour<60; hour++){
+     if(hour<10){
+      tela.setCursor(0,1);
+      tela.print(0);
+      tela.setCursor(1,1);
+      tela.print(hour);
+    }
+    if (hour>9){
+      tela.setCursor(0,1);
+        tela.print(hour);
+    }
+  
+  	for(minut=0; minut<60; minut++){
+      if (minut<10){
+         tela.setCursor(3,1);
+      	 tela.print(0);
+         tela.setCursor(4,1);
+         tela.print(minut);
+    }
+      if(minut>9){
+      			tela.setCursor(3,1);
+        		tela.print(minut);
+    }
+
+  	for(sec=0; sec<60; sec++){
+    	 if (sec<9){
+       		tela.setCursor(6,1);
+       		tela.print(0);
+        	tela.setCursor(7,1);
+       		tela.print(sec);
+          }
+     		 if (sec>9){
+         		tela.setCursor(6,1);
+         		tela.print(sec);
+   
+      }
+   delay(10);
+      	tela.setCursor(0,0);
+     	tela.print("Horario :");
+      	tela.setCursor(2,1);
+        tela.print(":");
+      	tela.setCursor(5,1);
+        tela.print(":");
+  
+       
+
+
+        
+   }
+  }
+ }
+}  
+  
+
+     
