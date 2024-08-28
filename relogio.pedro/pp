@@ -17,6 +17,9 @@ LiquidCrystal tela (RS, E, DB4, DB5, DB6, DB7);
 int sec = 0;
 int minut = 0;
 int hour = 0;
+int horas = 0;
+int minutos = 0;
+int segundos = 0;
 volatile bool flag = false;
 
 
@@ -101,7 +104,8 @@ void relogio() {
   int estadoBT2 = digitalRead(BUTTON2);
   int estadoBT3 = digitalRead(BUTTON3);
 
-  for (hour = 0; hour < 60; hour++) {
+  for (hour = horas; hour < 60; hour++) {
+    horas=hour;
     if (hour < 10) {
       tela.setCursor(0, 1);
       tela.print(0);
@@ -115,7 +119,8 @@ void relogio() {
     }
 
 
-    for (minut = 0; minut < 60; minut++) {
+    for (minut = minutos; minut < 60; minut++) {
+      minutos = minut;
       if (minut < 10) {
         tela.setCursor(3, 1);
         tela.print(0);
@@ -129,7 +134,8 @@ void relogio() {
       }
 
 
-      for (sec = 0; sec < 60; sec++) {
+      for (sec = segundos; sec < 60; sec++) {
+        segundos = sec;
         if (sec < 9) {
           tela.setCursor(6, 1);
           tela.print(0);
@@ -150,16 +156,18 @@ void relogio() {
 
 
 
-        delay(100);
+        delay(10);
         tela.setCursor(0, 0);
         tela.print("Horario :");
         tela.setCursor(2, 1);
         tela.print(":");
         tela.setCursor(5, 1);
         tela.print(":");
+
       }
     }
   }
+
 }
 void loop () {
   relogio();
