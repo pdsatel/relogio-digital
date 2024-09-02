@@ -19,9 +19,22 @@ int hour = 0;
 int horas = 0;
 int minutos = 0;
 int segundos = 0;
+
 volatile bool flag = false;
-volatile bool flag1 = true;
+volatile bool flag1 = false;
+//volatile bool flag2 = false;
 bool startCronometro = false;
+
+int c1;
+int c2;
+int c3;
+int c1_atual = 0;
+int c2_atual = 0;
+int c3_atual = 0;
+
+
+bool contagem = true;
+bool parada = false;
 
 void setup() {
   tela.begin(16, 2);
@@ -37,9 +50,12 @@ void isr() {
 }
 
 void isr1() {
-  flag1 = false; // Sinaliza para resetar o cronômetro
-
+  flag1 = true; // Sinaliza para resetar o cronômetro
 }
+
+/*void isr2{
+  flag2 = true;
+  }*/
 
 void zeros(int A1, int A2, int A3) {
   tela.setCursor(0, 1);
@@ -54,34 +70,28 @@ void zeros(int A1, int A2, int A3) {
   if (A3 < 10) tela.print("0");
   tela.print(A3);
 }
-void pause(){
-}
-  
+
 void cronometro() {
+  delay(100);
 
-  if (flag1) {
-    tela.setCursor(0, 0);
-    tela.print("Cronometro :");
-    tela.setCursor(0, 1);
-    tela.print("00:");
-    tela.setCursor(3, 1);
-    tela.print("00:00");
-  } 
-    if (flag) {
-      flag = false; // Reseta a flag
-      tela.clear();
-      startCronometro = false; // Para de contar o cronômetro
-       // Sai da função cronômetro
+  bool contagem = false;
+  int estadoBT3 = digitalRead(BUTTON3);
 
-      return;
-    }
+  if (flag1 == true) {
+    flag1 = false;
+    contagem = true;
 
+  while (contagem == true) {
+      //if (estadoBT
 
-  if (flag1 == false){
-      for (hour = 0; hour < 24; hour++) { // 24 horas
-        for (minut = 0; minut < 60; minut++) {
-          for (sec = 0; sec < 60; sec++) {
-            zeros(hour, minut, sec);
+      /*if (flag1) {
+        }*/
+
+      //if (flag1 == false) {
+      for (c1 = 0; c1 < 24; c1++) { // 24 horas
+        for (c2 = 0; c2 < 60; c2++) {
+          for (c3 = 0; c3 < 60; c3++) {
+            zeros(c1, c2, c3);
             delay(10);
             tela.setCursor(0, 0);
             tela.print("Cronometro :");
@@ -90,17 +100,28 @@ void cronometro() {
             tela.setCursor(5, 1);
             tela.print(":");
 
-            if (flag) {
-              flag = false; // Reseta a flag
-              tela.clear();
-              startCronometro = false; // Para de contar o cronômetro
-              return; // Sai da função cronômetro
+            if (flag1 == true) {
+              flag1 = false; // Reseta a flag
+              contagem = true;
+              //tela.clear();
+              //startCronometro = false; // Para de contar o cronômetro
+              return cronometro(); // Sai da função cronômetro
             }
           }
         }
       }
+    }
+  }
+
+  else {
+    return cronometro();
   }
 }
+
+
+	 
+
+
 void relogio() {
   int estadoBT = digitalRead(BUTTON);
   int estadoBT2 = digitalRead(BUTTON2);
@@ -142,11 +163,18 @@ void relogio() {
           tela.print(sec);
         }
 
-        if (flag) {
+        if (flag == true) {
           flag = false; // Reseta a flag
           tela.clear();
-          startCronometro = true; // Inicia o cronômetro
-          return; // Sai da função relogio
+          tela.setCursor(0, 0);
+          tela.print("Cronometro :");
+          tela.setCursor(0, 1);
+          tela.print("00:");
+          tela.setCursor(3, 1);
+          tela.print("00:00");
+          cronometro();
+          //startCronometro = true; // Inicia o cronômetro
+          //return; // Sai da função relogio
         }
 
         delay(1000);
@@ -165,14 +193,15 @@ void relogio() {
   }
 
   horas = 0;
-   }
-  
- 
- void loop() {
+}
+
+
+void loop() {
   if (startCronometro) {
     cronometro();
   } else {
     relogio();
   }
 }
+
 
