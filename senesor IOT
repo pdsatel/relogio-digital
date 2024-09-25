@@ -1,0 +1,152 @@
+#include <Wire.h> // Biblioteca para uso do protocolo I2C
+#include <Adafruit_GFX.h> // Biblioteca para manipulação gráfica no display
+#include <Adafruit_SH1106.h> // Biblioteca para operação do driver de controle do display
+
+#include <SPI.h> // Biblioteca para utilização do protocolo SPI
+#include <MFRC522.h> // Biblioteca para utilização do circuito RFID MFRC522
+#include <SoftwareSerial.h> // Biblioteca para comunicação serial via Software
+
+#define OLED_RESET -1 // Em displays que não possuem pino RESET
+Adafruit_SH1106 display(OLED_RESET); // Declaração da tela com o nome "display"
+
+#define C_SELECT 10 // Pino SDA do módulo RFID
+#define RESET 9 // Pino RESET do módulo MFRC522
+MFRC522 rfid(C_SELECT, RESET); // Declaração do módulo com o nome "rfid" no sistema com os pinos do define
+
+SoftwareSerial BT(8, 7); // 13 = RX; 12 = TX do módulo Bluetooth
+char info;
+String dados = ""; // String vazia para armazenar o endereço da tag/cartão RFID
+unsigned long tempo_anterior = 0;
+unsigned long intervalo = 2000;
+int buzzer = 4;
+// Intervalo para leitura RFID
+
+void titulo() {
+  display.clearDisplay(); // Limpa a tela
+  display.setTextColor(WHITE); // Define a cor do texto
+  display.setTextSize(1); // Define o tamanho do texto
+  display.setCursor(5, 5); // (linha, coluna)
+  display.print(F("Controle de Entradas")); // Texto a ser escrito
+  display.display();
+}
+
+int leitura() {
+  Serial.print(F("Endereco da TAG (HEX): "));
+
+  for (byte i = 0; i < rfid.uid.size; i++) { // Loop que percorre o endereço lido no RFID
+    if (rfid.uid.uidByte[i] < 0x10) {
+      Serial.print(F(" 0"));
+    } else {
+      Serial.print(F(" "));
+    }
+    Serial.print(rfid.uid.uidByte[i], HEX); // Exibe o endereço lido
+
+    if (rfid.uid.uidByte[i] < 0x10) {
+      dados.concat(String(" 0"));
+    } else {
+      dados.concat(String(" "));
+    }
+    dados.concat(String(rfid.uid.uidByte[i], HEX));
+    dados.toUpperCase(); // Coloca todos os valores do endereço em caixa alta
+  }
+  if (dados.substring(1) == "50 BB 19 A4") {
+    return 1;
+  }
+  else if (dados.substring(1) == "A3 7B FB 1A") {
+    return 2;
+  }
+  else if (dados.substring(1) == "E6 C6 6A AC") {
+    return 3;
+  }
+  else {
+    return 4;
+  }
+}
+void setup() {
+  Serial.begin(9600);
+
+  // Inicialização do display
+  display.begin(SH1106_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay(); // Limpa a tela
+
+  // Inicialização do módulo RFID
+  SPI.begin(); // Inicialização do protocolo SPI
+  rfid.PCD_Init(); // Inicialização do módulo RFID
+  Serial.println(F("RFID: Operacional"));
+  // Iicialização do Buzzer
+  pinMode(buzzer, OUTPUT);
+  // Inicialização do Bluetooth
+  BT.begin(38400);
+}
+// //
+void loop() {
+  unsigned long tempo_atual = millis(); // Variável para armazenar o valor da função millis()
+  titulo();
+  // Atualiza a tela do display
+  // Leitura RFID
+  if (tempo_atual - tempo_anterior >= intervalo) { // Temporização para leitura a cada 2 seg
+    tempo_anterior = tempo_atual; // Zera a variável tempo_anterior
+
+    if (!rfid.PICC_IsNewCardPresent()) { // Testa se não há novo cartão
+      return;
+    }
+
+    if (!rfid.PICC_ReadCardSerial()) { // Testa se não conseguiu ler o cartão
+      return;
+    }
+  }
+
+  if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
+    switch(leitura()){
+      case 1:
+        Serial.println(); // Printa os valores de endereço no Console Serial
+        display.clearDisplay();
+        display.setCursor(0, 30);
+        display.println(F("Permitido! Gerencia!"));
+        Serial.println(F("Permitido! Gerencia"));
+        display.display();
+        tone(buzzer, 750);
+        delay(500);
+        noTone(buzzer);
+        delay(500);
+        break;
+      case 2:
+        Serial.println(); // Printa os valores de endereço no Console Serial
+        display.clearDisplay();
+        display.setCursor(0, 30);
+        display.println(F("Permitido! Colaborador"));
+        Serial.println(F("Permitido! Colaborador"));
+        display.display();
+        tone(buzzer, 750);
+        delay(500);
+        noTone(buzzer);
+        delay(500);
+        break;
+      case 3:
+        Serial.println(); // Printa os valores de endereço no Console Serial
+        display.clearDisplay();
+        display.setCursor(0, 30);
+        display.println(F("Permitido! Estagiario"));
+        Serial.println(F("Permitido! Estagiario"));
+        display.display();
+        tone(buzzer, 750);
+        delay(500);
+        noTone(buzzer);
+        delay(500);
+        break;
+      case 4:
+        Serial.println(); // Printa os valores de endereço no Console Serial
+        display.clearDisplay();
+        display.setCursor(0, 30);
+        display.println(F("Negado!"));
+        Serial.println(F("Negado!"));
+        display.display();
+        tone(buzzer, 750);
+        delay(500);
+        noTone(buzzer);
+        delay(500);
+        break;                        
+    }
+    dados = "";
+  }
+}
